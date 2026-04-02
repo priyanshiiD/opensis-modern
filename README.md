@@ -16,7 +16,18 @@ opensis-modern/
    package.json      # Workspace scripts
 ```
 
-## Security-First Setup
+## What Is Implemented
+
+- Auth endpoints: login, refresh, logout, me
+- JWT access + refresh token flow
+- Role and permission mapping
+- Permission-protected routes
+- MongoDB-backed users, refresh sessions, and students collections
+- One-time demo seed command for onboarding
+
+## Quick Start (Teammate Onboarding)
+
+Each teammate should use their own MongoDB Atlas cluster and credentials.
 
 1. Install dependencies
 
@@ -43,37 +54,24 @@ Optional one-time demo seed values (used only with `npm run seed:demo`):
 - DEMO_PASSWORD=Demo@12345!
 - DEMO_PROFILE_ID=1
 
-4. Optional frontend API base URL in apps/web/.env
+4. Set frontend API base URL in apps/web/.env
 
 - VITE_API_BASE_URL=http://localhost:4000
 
-## Teammate Setup (Own Atlas Cluster)
-
-Use isolated MongoDB Atlas setup per teammate (no shared cluster).
-
-1. Create your own Atlas project and cluster.
-2. Create your own Atlas DB user and password.
-3. Create local env files from examples:
-
-```bash
-copy apps\api\.env.example apps\api\.env
-copy apps\web\.env.example apps\web\.env
-```
-
-4. Update apps/api/.env with your own values:
-
-- MONGODB_URI (your own Atlas URI)
-- MONGODB_DB (recommended: opensis)
-- JWT_ACCESS_SECRET
-- JWT_REFRESH_SECRET
-
-5. Run one-time seed on your own database:
+5. Run one-time seed on your own database
 
 ```bash
 npm run seed:demo
 ```
 
-## Run Locally
+6. Start backend and frontend
+
+```bash
+npm run dev:api
+npm run dev:web
+```
+
+## Run Commands
 
 Backend:
 
@@ -99,6 +97,17 @@ Build all workspaces:
 npm run build
 ```
 
+## Troubleshooting
+
+- Atlas auth failed (`bad auth : authentication failed`):
+Use the correct Atlas DB username/password in MONGODB_URI. If password contains special characters (for example `@`), URL-encode them in the URI.
+
+- API port already in use (`EADDRINUSE: 4000`):
+Stop the previous backend process and run `npm run dev:api` again.
+
+- Login fails after setup:
+Run `npm run seed:demo` once, then retry login with demo.admin / Demo@12345!.
+
 ## Share-Ready Rules
 
 - Never commit .env files.
@@ -123,13 +132,3 @@ npm run build
 ```bash
 git status --short
 ```
-
-## Current Foundation Implemented
-
-- Auth endpoints: login, refresh, logout, me
-- JWT access + refresh token flow
-- Role and permission mapping
-- Permission-protected routes
-- Standard API success/error envelope
-- MongoDB-backed users, refresh sessions, and students collections
-- One-time demo seed command for onboarding
