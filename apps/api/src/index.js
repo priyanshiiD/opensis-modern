@@ -7,7 +7,13 @@ import { MongoClient } from 'mongodb';
 import { randomUUID } from 'crypto';
 
 dotenv.config();
+import path from 'path';
 
+dotenv.config({
+  path: path.resolve(process.cwd(), '.env')
+});
+console.log('ACCESS:', process.env.JWT_ACCESS_SECRET);
+console.log('REFRESH:', process.env.JWT_REFRESH_SECRET);
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const mongoUri = process.env.MONGODB_URI;
