@@ -11,28 +11,29 @@ import {
 } from '../utils/auth.js';
 import { sendError, sendSuccess } from '../utils/http.js';
 
-import User from '../models/user.model.js'; 
-
 export const seedAdmin = async (req, res) => {
-  const { username,email, password, seedSecret } = req.body;
+  const { username, email, password, seedSecret } = req.body;
   if (seedSecret !== process.env.ADMIN_SEED_SECRET) {
     return res.status(403).json({ error: 'Forbidden: Invalid seed secret.' });
   }
   try {
-    const adminExists = await User.findOne({ role: 'admin' });
+    const database = await getDatabase();
+    const users = database.collection(collections.users);
+    const adminExists = await users.findOne({ role: 'admin' });
     if (adminExists) {
       return res.status(409).json({ error: 'Conflict: Admin already seeded.' });
     }
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newAdmin = new User({
-      username: username,
-      email: email,
-      password: hashedPassword,
-      role: 'admin', 
+    const passwordHash = await bcrypt.hash(password, 10);
+    await users.insertOne({
+      username,
+      email,
+      usernameLower: normalizeUsername(username),
+      passwordHash,
+      role: 'admin',
+      profileId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
-
-    await newAdmin.save();
 
     return res.status(201).json({ message: 'Admin account successfully seeded.' });
 

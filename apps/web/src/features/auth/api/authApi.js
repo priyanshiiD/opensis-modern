@@ -1,7 +1,7 @@
 import { apiBaseUrl } from '../../../shared/config/env.js';
 
 export async function loginRequest(username, password) {
-  const response = await fetch(`${apiBaseUrl}/auth/login`, {
+  const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password })
@@ -21,7 +21,7 @@ export async function logoutRequest(accessToken, refreshToken) {
     return;
   }
 
-  await fetch(`${apiBaseUrl}/auth/logout`, {
+  await fetch(`${apiBaseUrl}/api/auth/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
