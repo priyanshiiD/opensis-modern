@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { clearAuthTokens, getAccessToken, getRefreshToken } from './auth';
+import { apiBaseUrl } from '../../../shared/config/env.js';
+import { logoutRequest } from '../../auth/api/authApi.js';
+import { clearAuthTokens, getAccessToken, getRefreshToken } from '../../auth/storage/tokenStorage.js';
 
 export function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [error, setError] = useState('');
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
   useEffect(() => {
     const token = getAccessToken();
@@ -27,23 +28,16 @@ export function StudentsPage() {
         setStudents(data.data?.students || []);
       })
       .catch((e) => setError(e.message));
-  }, [apiBaseUrl]);
+  }, []);
 
   async function onLogout() {
     const accessToken = getAccessToken();
     const refreshToken = getRefreshToken();
 
-    if (accessToken) {
-      await fetch(`${apiBaseUrl}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`
-        },
-        body: JSON.stringify({ refreshToken })
-      }).catch(() => {
-        // Local cleanup must still happen if logout call fails.
-      });
+    try {
+      await logoutRequest(accessToken, refreshToken);
+    } catch {
+      // Local cleanup must still happen if logout call fails.
     }
 
     clearAuthTokens();

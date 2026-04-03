@@ -1,16 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { DashboardPage } from './DashboardPage';
-import { isAuthenticated } from './auth';
-import { LoginPage } from './LoginPage';
-import { StudentsPage } from './StudentsPage';
-
-function ProtectedRoute({ children }) {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
+import { ProtectedRoute } from './ProtectedRoute.jsx';
+import { LoginPage } from '../features/auth/pages/LoginPage.jsx';
+import { DashboardPage } from '../features/dashboard/pages/DashboardPage.jsx';
+import { StudentsPage } from '../features/students/pages/StudentsPage.jsx';
 
 export function App() {
   return (

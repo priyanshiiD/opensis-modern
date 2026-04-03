@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { clearAuthTokens } from './auth';
+import { clearAuthTokens } from '../../auth/storage/tokenStorage.js';
 
 export function DashboardPage() {
   return (
