@@ -12,7 +12,7 @@ export function createApp() {
   app.use(express.json());
 
   app.use(healthRoutes);
-  app.use(authRoutes);
+  app.use('/api/auth',authRoutes);
   app.use(adminRoutes);
   app.use(studentRoutes);
 
