@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setAuthTokens } from './auth';
+import { loginRequest } from '../api/authApi.js';
+import { setAuthTokens } from '../storage/tokenStorage.js';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -8,7 +9,6 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
   async function onSubmit(event) {
     event.preventDefault();
@@ -16,22 +16,11 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error?.message || 'Login failed.');
-        return;
-      }
-
+      const data = await loginRequest(username, password);
       setAuthTokens(data.data.accessToken, data.data.refreshToken);
       navigate('/dashboard');
-    } catch {
-      setError('Could not connect to API.');
+    } catch (e) {
+      setError(e.message || 'Could not connect to API.');
     } finally {
       setLoading(false);
     }
