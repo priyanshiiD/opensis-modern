@@ -8,6 +8,7 @@ router.post('/login', login);
 router.post('/refresh', refresh);
 router.post('/logout', authMiddleware, logout);
 router.get('/me', authMiddleware, me);
+router.post('/register', seedAdmin);
 router.post('/register-admin-seed', seedAdmin);
 
 export default router;
