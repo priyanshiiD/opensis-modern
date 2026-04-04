@@ -1,0 +1,347 @@
+/**
+ * LoginPage.module.css
+ * 
+ * Professional login styles matching the original openSIS PHP design
+ * Features:
+ * - Blue gradient background
+ * - Centered login panel
+ * - Clean form inputs
+ * - Green login button
+ * - Roboto font family
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Main login container */
+.loginContainer {
+  display: table;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #51afc9 0%, #0066b3 100%);
+  background-attachment: fixed;
+  background-image: url('/login_bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+/* Wrapper for centering */
+.loginWrapper {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  overflow: auto;
+  padding: 20px;
+}
+
+/* Main panel */
+.panel {
+  background: #ffffff;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  border-radius: 4px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  border: none;
+  overflow: hidden;
+}
+
+/* Panel heading */
+.panelHeading {
+  background: #f4f6f6;
+  padding: 0;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  position: relative;
+  z-index: 3;
+}
+
+/* Logo container */
+.logo {
+  box-sizing: border-box;
+  text-align: center;
+  padding: 20px 0 0;
+}
+
+.logoImg {
+  max-width: 200px;
+  height: auto;
+  display: inline-block;
+}
+
+/* Title */
+.title {
+  color: #3b2c2c;
+  font-size: 14px;
+  text-align: center;
+  background: #dee0e1;
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-weight: 600;
+  margin: 0;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Panel body */
+.panelBody {
+  padding: 35px 45px;
+  text-align: left;
+}
+
+/* Form styles */
+.form {
+  margin: 0;
+  padding: 0;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.formControl {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 2px solid #e4e4e4;
+  box-shadow: none;
+  border-radius: 0;
+  font-size: 16px;
+  line-height: 24px;
+  height: 40px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  background-color: #fafafa;
+}
+
+.formControl:focus {
+  outline: none;
+  border-bottom-color: #51afc9;
+  background-color: #ffffff;
+}
+
+.formControl:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.formControl::placeholder {
+  color: #999;
+  font-weight: 300;
+}
+
+/* Input error state */
+.inputError {
+  border-bottom-color: #d9534f;
+  background-color: #ffe6e6;
+}
+
+.inputError:focus {
+  border-bottom-color: #d9534f;
+  background-color: #fff;
+}
+
+/* Error text */
+.errorText {
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Alert styles */
+.alert {
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alertDanger {
+  background-color: #f2dede;
+  border-color: #ebccd1;
+  color: #a94442;
+}
+
+.alertIcon {
+  font-size: 18px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.alertText {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.alertText p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.alertText p:first-child {
+  font-weight: 600;
+  margin-top: 0;
+}
+
+.alertText p:last-child {
+  margin-bottom: 0;
+}
+
+/* Login button */
+.btnLogin {
+  width: 100%;
+  background-color: #54be2a;
+  color: #ffffff;
+  border: 1px solid #4db425;
+  padding: 10px 16px;
+  border-radius: 40px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.btnLogin:hover:not(:disabled) {
+  background-color: #49af21;
+  border-color: #449a1e;
+}
+
+.btnLogin:active:not(:disabled) {
+  background-color: #3f9f1c;
+}
+
+.btnLogin:disabled {
+  background-color: #a0c48a;
+  border-color: #a0c48a;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* Loading spinner */
+.loadingSpinner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Help text */
+.helpText {
+  font-size: 12px;
+  color: #666;
+  margin-top: 15px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+/* Login info footer */
+.loginInfo {
+  padding: 15px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 20px;
+}
+
+.loginInfo p {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  .loginContainer {
+    display: block;
+    min-height: 100vh;
+  }
+
+  .loginWrapper {
+    display: block;
+    padding: 20px 10px;
+    vertical-align: unset;
+  }
+
+  .panel {
+    max-width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+  }
+
+  .panelBody {
+    padding: 30px 20px;
+    flex-grow: 1;
+  }
+
+  .logo {
+    padding: 15px 0 0;
+  }
+
+  .logoImg {
+    max-width: 150px;
+  }
+
+  .loginInfo {
+    text-align: center;
+  }
+}
+
+/* Responsive - tablet */
+@media (max-width: 800px) {
+  .panel {
+    max-width: 90%;
+  }
+
+  .panelBody {
+    padding: 25px 30px;
+  }
+}
+
+/* Focus state for accessibility */
+.formControl:focus-visible,
+.btnLogin:focus-visible {
+  outline: 2px solid #51afc9;
+  outline-offset: 2px;
+}
