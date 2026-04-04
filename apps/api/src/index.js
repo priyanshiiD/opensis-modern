@@ -1,5 +1,5 @@
 import { createApp } from './app.js';
-import { ensureIndexes, getDatabase } from './config/db.js';
+import { connectDatabase, ensureIndexes } from './config/db.js';
 import { env, validateEnvironment } from './config/env.js';
 
 validateEnvironment();
@@ -7,8 +7,8 @@ validateEnvironment();
 const app = createApp();
 
 async function start() {
-  const database = await getDatabase();
-  await ensureIndexes(database);
+  await connectDatabase();
+  await ensureIndexes();
   console.log('✅ MongoDB connected successfully!');
 
   app.listen(env.port, () => {

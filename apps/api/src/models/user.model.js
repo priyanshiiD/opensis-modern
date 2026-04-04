@@ -2,23 +2,44 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
+    userId: {
+      type: Number,
+      required: true,
+      unique: true,
+      index: true
+    },
+    profileId: {
+      type: Number,
+      required: true,
+      index: true
+    },
     username: {
       type: String,
       required: true,
       unique: true,
+      index: true,
       trim: true,
       minlength: 3,
       maxlength: 30
     },
-    email: {
+    usernameLower: {
       type: String,
       required: true,
       unique: true,
+      index: true,
+      trim: true,
+      lowercase: true
+    },
+    email: {
+      type: String,
+      required: false,
+      unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
       match: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
     },
-    password: {
+    passwordHash: {
       type: String,
       required: true,
       select: false,
@@ -35,9 +56,19 @@ const userSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    versionKey: false,
+    collection: 'login_authentication'
   }
 );
+
+userSchema.pre('validate', function setUsernameLower(next) {
+  if (this.username) {
+    this.usernameLower = this.username.trim().toLowerCase();
+  }
+
+  next();
+});
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,23 +1,36 @@
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 import { env } from './env.js';
-import { collections } from './constants.js';
+import User from '../models/user.model.js';
+import RefreshToken from '../models/refreshToken.model.js';
+import Student from '../models/student.model.js';
+import Teacher from '../models/teacher.model.js';
 
-const mongoClient = env.mongoUri ? new MongoClient(env.mongoUri) : null;
-let databasePromise = null;
+let connectionPromise = null;
 
-export async function getDatabase() {
-  if (!databasePromise) {
-    databasePromise = mongoClient.connect().then((client) => client.db(env.mongoDbName));
+export async function connectDatabase() {
+  if (!env.mongoUri || !env.mongoDbName) {
+    throw new Error('Missing MongoDB configuration. Set MONGODB_URI and MONGODB_DB.');
   }
 
-  return databasePromise;
+  if (!connectionPromise) {
+    connectionPromise = mongoose
+      .connect(env.mongoUri, { dbName: env.mongoDbName })
+      .then(() => mongoose.connection)
+      .catch((error) => {
+        connectionPromise = null;
+        throw error;
+      });
+  }
+
+  return connectionPromise;
 }
 
-export async function ensureIndexes(database) {
-  await Promise.all([
-    database.collection(collections.users).createIndex({ usernameLower: 1 }, { unique: true }),
-    database.collection(collections.refreshTokens).createIndex({ jti: 1 }, { unique: true }),
-    database.collection(collections.refreshTokens).createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    database.collection(collections.students).createIndex({ studentId: -1 }, { unique: true })
-  ]);
+export async function getDatabase() {
+  const connection = await connectDatabase();
+  return connection.db;
+}
+
+export async function ensureIndexes() {
+  await connectDatabase();
+  await Promise.all([User.init(), RefreshToken.init(), Student.init(), Teacher.init()]);
 }
