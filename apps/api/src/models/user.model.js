@@ -62,12 +62,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.pre('validate', function setUsernameLower(next) {
+userSchema.pre('validate', function setUsernameLower() {
   if (this.username) {
     this.usernameLower = this.username.trim().toLowerCase();
   }
-
-  next();
+  
 });
 
 const User = mongoose.model('User', userSchema);

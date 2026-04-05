@@ -58,13 +58,13 @@ const teacherSchema = new mongoose.Schema(
 );
 
 
-teacherSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+teacherSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
-teacherSchema.pre("findOneAndUpdate", async function (next) {
+
+teacherSchema.pre("findOneAndUpdate", async function () {
   const update = this.getUpdate();
   if (update.password) {
     update.password = await bcrypt.hash(update.password, 10);
@@ -72,7 +72,6 @@ teacherSchema.pre("findOneAndUpdate", async function (next) {
   if (update.$set && update.$set.password) {
     update.$set.password = await bcrypt.hash(update.$set.password, 10);
   }
-  next();
 });
 
 

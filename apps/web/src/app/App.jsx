@@ -4,11 +4,13 @@ import { ProtectedRoute } from './ProtectedRoute.jsx';
 import { LoginPage } from '../features/auth/pages/LoginPage.jsx';
 import DashboardPage from '../features/dashboard/pages/DashboardPage.jsx';
 import StudentsPage from '../features/students/pages/StudentsPage.jsx';
+import TeachersPage from "../features/teachers/pages/TeachersPage";
 
 export function App() {
   return (
     <AuthProvider>
       <Routes>
+<Route path="/teachers" element={<TeachersPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"
