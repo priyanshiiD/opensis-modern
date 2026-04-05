@@ -16,7 +16,7 @@ export function createApp() {
   app.use('/api', healthRoutes);
   app.use('/api/auth', authRoutes);
   app.use('/api', adminRoutes);
-  app.use('/api', studentRoutes);
+  app.use('/api/students', studentRoutes);
   app.use('/api/teachers', teacherRoutes);
 
   app.use((req, res) => {
