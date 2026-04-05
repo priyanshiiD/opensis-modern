@@ -1,144 +1,87 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { loginRequest, logoutRequest } from '../api/authApi.js';
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+import { loginUser } from '../api/authApi.js';
 import {
-  setAuthTokens,
-  getAccessToken,
-  getRefreshToken,
-  clearAuthTokens,
-  isAuthenticated
+  setToken,
+  getToken,
+  removeToken,
+  isAuthenticated as _isAuthenticated
 } from '../storage/tokenStorage.js';
+import toast from 'react-hot-toast';
 
-// Create the authentication context
 export const AuthContext = createContext(null);
 
-/**
- * AuthProvider Component
- * 
- * Provides authentication state and functions throughout the app.
- * Handles:
- * - User state management
- * - Login/logout operations
- * - JWT token storage and retrieval
- * - Auto-login on page refresh
- * - Loading and error states
- */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize auth state on component mount (check if token exists)
   useEffect(() => {
     const initializeAuth = () => {
       try {
-        const accessToken = getAccessToken();
-        if (accessToken) {
-          // Parse JWT to get user info (basic parsing, doesn't verify signature)
-          // In production, you might want to validate the token with the backend
-          const parts = accessToken.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            setUser({
-              userId: payload.userId,
-              username: payload.username,
-              role: payload.role,
-              profileId: payload.profileId,
-              permissions: payload.permissions
-            });
+        const token = getToken();
+        if (token) {
+          // Typically we would fetch the user profile from the server using the token,
+          // but for this simplified flow, we'll decode the basic JWT or assume user needs a refresh.
+          // Because the requirement states { token, user: {id, name, role} } on login,
+          // we might just store user in localStorage or only rely on the token.
+          // Let's grab user from localStorage if it exists, or just set derived defaults.
+          const storedUser = localStorage.getItem('opensis_user');
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          } else {
+            // Decoding simple payload if present
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              setUser({ id: payload.id, name: payload.name, role: payload.role });
+            }
           }
         }
       } catch (err) {
         console.error('Error initializing auth:', err);
-        clearAuthTokens();
+        removeToken();
+        localStorage.removeItem('opensis_user');
       } finally {
         setIsInitializing(false);
       }
     };
-
     initializeAuth();
   }, []);
 
-  /**
-   * Login function
-   * Calls the login API and stores tokens
-   */
   const login = useCallback(async (username, password) => {
     setIsLoading(true);
     setError(null);
-
     try {
-      const response = await loginRequest(username, password);
-
-      // Extract tokens from response
-      const { accessToken, refreshToken, user } = response;
-
-      if (!accessToken || !refreshToken) {
-        throw new Error('Invalid response: Missing authentication tokens');
+      const response = await loginUser({ username, password });
+      
+      const { token, user } = response;
+      if (!token) {
+        throw new Error('Invalid response: Missing token');
       }
 
-      // Store tokens
-      setAuthTokens(accessToken, refreshToken);
-
-      // Set user state - handle flexible user object format
-      const userData = {
-        userId: user?.userId || user?._id,
-        username: user?.username || 'User',
-        role: user?.role || 'user',
-        profileId: user?.profileId || user?.profile_id,
-        permissions: user?.permissions || []
-      };
-
-      setUser(userData);
+      setToken(token);
+      setUser(user);
+      localStorage.setItem('opensis_user', JSON.stringify(user));
+      
       return response;
     } catch (err) {
       const errorMessage = err.message || 'Login failed. Please check your credentials and try again.';
       setError(errorMessage);
-      console.error('Login error:', err);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  /**
-   * Logout function
-   * Clears tokens and user state
-   */
-  const logout = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const accessToken = getAccessToken();
-      const refreshToken = getRefreshToken();
-
-      // Call logout endpoint if tokens exist
-      if (accessToken || refreshToken) {
-        try {
-          await logoutRequest(accessToken, refreshToken);
-        } catch (err) {
-          // Log error but continue with local logout
-          console.error('Error logging out on server:', err);
-        }
-      }
-
-      // Clear local state
-      clearAuthTokens();
-      setUser(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-      // Still clear local state even if server logout fails
-      clearAuthTokens();
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+  const logout = useCallback(() => {
+    // Optionally call logoutUser() from api here if needed
+    removeToken();
+    localStorage.removeItem('opensis_user');
+    setUser(null);
   }, []);
 
-  /**
-   * Clear error message
-   */
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -148,13 +91,10 @@ export function AuthProvider({ children }) {
     isLoading,
     isInitializing,
     error,
-    isAuthenticated: !!user && isAuthenticated(),
+    isAuthenticated: !!user && _isAuthenticated(),
     login,
     logout,
-    clearError,
-    // Exposed for debugging/testing
-    getAccessToken,
-    getRefreshToken
+    clearError
   };
 
   return (
@@ -164,14 +104,11 @@ export function AuthProvider({ children }) {
   );
 }
 
-/**
- * Custom hook to use the AuthContext
- * Must be used inside AuthProvider
- */
 export function useAuth() {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used inside AuthProvider');
   }
   return context;
 }
+
