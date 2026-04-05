@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import { sendError } from './utils/http.js';
+import teacherRoutes from './routes/teacherRoutes.js';
 
 export function createApp() {
   const app = express();
@@ -16,6 +17,7 @@ export function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api', adminRoutes);
   app.use('/api', studentRoutes);
+  app.use('/api/teachers', teacherRoutes);
 
   app.use((req, res) => {
     sendError(res, 404, 'NOT_FOUND', `Cannot ${req.method} ${req.originalUrl}`);
