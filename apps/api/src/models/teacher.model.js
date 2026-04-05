@@ -15,6 +15,7 @@ const teacherSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
       lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email"],
     },
 
     password: {
@@ -26,6 +27,7 @@ const teacherSchema = new mongoose.Schema(
 
     phone: {
       type: String,
+      match: [/^\d{10}$/, "Phone must be 10 digits"],
     },
 
     gender: {
@@ -33,17 +35,9 @@ const teacherSchema = new mongoose.Schema(
       enum: ["male", "female", "other"],
     },
 
-    subjects: [
-      {
-        type: String,
-      },
-    ],
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
 
-    classes: [
-      {
-        type: String,
-      },
-    ],
+    classes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Class" }],
 
     role: {
       type: String,
@@ -67,6 +61,17 @@ const teacherSchema = new mongoose.Schema(
 teacherSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+teacherSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+  if (update.password) {
+    update.password = await bcrypt.hash(update.password, 10);
+  }
+  if (update.$set && update.$set.password) {
+    update.$set.password = await bcrypt.hash(update.$set.password, 10);
+  }
   next();
 });
 

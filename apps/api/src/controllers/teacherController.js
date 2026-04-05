@@ -87,7 +87,7 @@ export const getAllTeachers = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [teachers, total] = await Promise.all([
-      Teacher.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Teacher.find().select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Teacher.countDocuments(),
     ]);
 
@@ -107,7 +107,7 @@ export const getAllTeachers = async (req, res) => {
 
 export const getTeacherById = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id).lean();
+    const teacher = await Teacher.findById(req.params.id).select('-password').lean();
     if (!teacher) {
       return sendError(res, 404, "NOT_FOUND", "Teacher not found.");
     }
@@ -140,7 +140,7 @@ export const updateTeacher = async (req, res) => {
     const teacher = await Teacher.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,
-    }).lean();
+    }).select('-password').lean();
 
     if (!teacher) {
       return sendError(res, 404, "NOT_FOUND", "Teacher not found.");

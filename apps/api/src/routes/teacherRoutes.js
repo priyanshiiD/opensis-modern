@@ -13,8 +13,8 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.get("/", requirePermissions("students:read"), getAllTeachers);
-router.get("/:id", requirePermissions("students:read"), getTeacherById);
+router.get("/", requirePermissions("teachers:read"), getAllTeachers);
+router.get("/:id", requirePermissions("teachers:read"), getTeacherById);
 
 
 router.post("/", requirePermissions("admin:manage"), createTeacher);
