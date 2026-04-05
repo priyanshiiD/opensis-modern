@@ -1,46 +1,83 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const teacherSchema = new mongoose.Schema(
   {
-    teacherId: {
-      type: Number,
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
       required: true,
       unique: true,
-      index: true
+      sparse: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email"],
     },
-    firstName: {
+
+    password: {
       type: String,
       required: true,
-      trim: true
+      minlength: 6,
+      select: false,
     },
-    lastName: {
+
+    phone: {
       type: String,
-      required: true,
-      trim: true
+      match: [/^\d{10}$/, "Phone must be 10 digits"],
     },
-    department: {
+
+    gender: {
       type: String,
-      trim: true,
-      default: ''
+      enum: ["male", "female", "other"],
     },
-    subject: {
+
+    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
+
+    classes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Class" }],
+
+    role: {
       type: String,
-      trim: true,
-      default: ''
+      enum: ["teacher", "admin"],
+      default: "teacher",
     },
-    status: {
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
+    profilePic: {
       type: String,
-      enum: ['Active', 'Inactive'],
-      default: 'Active'
-    }
+    },
   },
-  {
-    timestamps: true,
-    versionKey: false,
-    collection: 'teachers'
-  }
+  { timestamps: true }
 );
 
-const Teacher = mongoose.model('Teacher', teacherSchema);
 
-export default Teacher;
+teacherSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+teacherSchema.pre("findOneAndUpdate", async function (next) {
+  const update = this.getUpdate();
+  if (update.password) {
+    update.password = await bcrypt.hash(update.password, 10);
+  }
+  if (update.$set && update.$set.password) {
+    update.$set.password = await bcrypt.hash(update.$set.password, 10);
+  }
+  next();
+});
+
+
+teacherSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+export default mongoose.model("Teacher", teacherSchema);
