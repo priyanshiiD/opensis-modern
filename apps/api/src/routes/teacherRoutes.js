@@ -22,3 +22,4 @@ router.put("/:id", requirePermissions("admin:manage"), updateTeacher);
 router.delete("/:id", requirePermissions("admin:manage"), deleteTeacher);
 
 export default router;
+

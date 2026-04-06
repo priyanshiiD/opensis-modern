@@ -105,7 +105,7 @@ const studentSchema = new mongoose.Schema(
   }
 );
 
-studentSchema.pre('save', function normalizeStudentFields(next) {
+studentSchema.pre('save', function normalizeStudentFields() {
   if (typeof this.firstName === 'string') {
     this.firstName = this.firstName.trim();
   }
@@ -146,7 +146,7 @@ studentSchema.pre('save', function normalizeStudentFields(next) {
     this.className = this.className.trim();
   }
 
-  next();
+  
 });
 
 studentSchema.index({ className: 1, status: 1 });
