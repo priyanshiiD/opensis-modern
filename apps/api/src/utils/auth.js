@@ -20,7 +20,7 @@ export function mapProfileIdToRole(profileId) {
 
 export function permissionsForRole(role) {
   const rolePermissions = {
-    admin: ['students:read', 'students:write', 'attendance:read', 'attendance:write', 'grades:read', 'grades:write', 'admin:manage'],
+    admin: ['students:read', 'students:write', 'teachers:read', 'teachers:write', 'attendance:read', 'attendance:write', 'grades:read', 'grades:write', 'admin:manage'],
     teacher: ['students:read', 'attendance:read', 'attendance:write', 'grades:read', 'grades:write'],
     staff: ['students:read', 'attendance:read', 'grades:read'],
     parent: ['students:read'],
