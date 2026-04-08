@@ -10,7 +10,14 @@ export function App() {
   return (
     <AuthProvider>
       <Routes>
-<Route path="/teachers" element={<TeachersPage />} />
+        <Route
+          path="/teachers"
+          element={
+            <ProtectedRoute>
+              <TeachersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"
