@@ -10,13 +10,13 @@ function TeacherTable({ onEdit, refreshKey }) {
   const [deletingId, setDeletingId] = useState(null);
 
   async function handleDelete(teacher) {
-    if (!window.confirm(`Delete ${teacher.fullName}? This cannot be undone.`)) return;
+    if (!window.confirm(`Delete ${teacher.firstName} ${teacher.lastName}? This cannot be undone.`)) return;
 
     const token = getAccessToken();
-    setDeletingId(teacher._id);
+    setDeletingId(teacher.teacherId);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/teachers/${teacher._id}`, {
+      const res = await fetch(`${apiBaseUrl}/api/teachers/${teacher.teacherId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -27,7 +27,7 @@ function TeacherTable({ onEdit, refreshKey }) {
         return;
       }
 
-      setTeachers((prev) => prev.filter((t) => t._id !== teacher._id));
+      setTeachers((prev) => prev.filter((t) => t.teacherId !== teacher.teacherId));
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -60,7 +60,7 @@ function TeacherTable({ onEdit, refreshKey }) {
         }
 
         setTeachers(json.data.teachers);
-      } catch (err) {
+      } catch {
         setError("Network error. Please try again.");
       } finally {
         setIsLoading(false);
@@ -91,8 +91,10 @@ function TeacherTable({ onEdit, refreshKey }) {
       <table className="w-full text-left text-sm">
         <thead className="bg-gray-50 border-b">
           <tr>
+            <th className="px-4 py-3 text-gray-600 font-medium">ID</th>
             <th className="px-4 py-3 text-gray-600 font-medium">Name</th>
-            <th className="px-4 py-3 text-gray-600 font-medium">Email</th>
+            <th className="px-4 py-3 text-gray-600 font-medium">Department</th>
+            <th className="px-4 py-3 text-gray-600 font-medium">Subject</th>
             <th className="px-4 py-3 text-gray-600 font-medium">Phone</th>
             <th className="px-4 py-3 text-gray-600 font-medium">Gender</th>
             <th className="px-4 py-3 text-gray-600 font-medium">Status</th>
@@ -101,20 +103,24 @@ function TeacherTable({ onEdit, refreshKey }) {
         </thead>
         <tbody>
           {teachers.map((teacher) => (
-            <tr key={teacher._id} className="border-b last:border-0 hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium text-gray-800">{teacher.fullName}</td>
-              <td className="px-4 py-3 text-gray-600">{teacher.email}</td>
+            <tr key={teacher.teacherId} className="border-b last:border-0 hover:bg-gray-50">
+              <td className="px-4 py-3 text-gray-500">{teacher.teacherId}</td>
+              <td className="px-4 py-3 font-medium text-gray-800">
+                {teacher.firstName} {teacher.lastName}
+              </td>
+              <td className="px-4 py-3 text-gray-600">{teacher.department || "—"}</td>
+              <td className="px-4 py-3 text-gray-600">{teacher.subject || "—"}</td>
               <td className="px-4 py-3 text-gray-600">{teacher.phone || "—"}</td>
               <td className="px-4 py-3 text-gray-600 capitalize">{teacher.gender || "—"}</td>
               <td className="px-4 py-3">
                 <span
                   className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                    teacher.isActive
+                    teacher.status === "Active"
                       ? "bg-green-100 text-green-700"
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {teacher.isActive ? "Active" : "Inactive"}
+                  {teacher.status}
                 </span>
               </td>
               <td className="px-4 py-3 flex gap-3">
@@ -126,10 +132,10 @@ function TeacherTable({ onEdit, refreshKey }) {
                 </button>
                 <button
                   onClick={() => handleDelete(teacher)}
-                  disabled={deletingId === teacher._id}
+                  disabled={deletingId === teacher.teacherId}
                   className="text-red-500 hover:underline text-sm disabled:opacity-50"
                 >
-                  {deletingId === teacher._id ? "Deleting..." : "Delete"}
+                  {deletingId === teacher.teacherId ? "Deleting..." : "Delete"}
                 </button>
               </td>
             </tr>

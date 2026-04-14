@@ -4,6 +4,7 @@ import User from '../models/user.model.js';
 import RefreshToken from '../models/refreshToken.model.js';
 import Student from '../models/student.model.js';
 import Teacher from '../models/teacher.model.js';
+import Class from '../models/class.model.js';
 
 let connectionPromise = null;
 
@@ -32,5 +33,5 @@ export async function getDatabase() {
 
 export async function ensureIndexes() {
   await connectDatabase();
-  await Promise.all([User.init(), RefreshToken.init(), Student.init(), Teacher.init()]);
+  await Promise.all([User.init(), RefreshToken.init(), Student.init(), Teacher.init(), Class.init()]);
 }
