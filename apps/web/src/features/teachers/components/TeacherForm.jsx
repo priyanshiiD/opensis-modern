@@ -10,13 +10,14 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
   const isEditMode = !!teacher;
 
   const emptyForm = {
-    fullName: "",
-    email: "",
-    password: "",
+    teacherId: "",
+    firstName: "",
+    lastName: "",
+    department: "",
+    subject: "",
     phone: "",
     gender: "",
-    profilePic: "",
-    isActive: true,
+    status: "Active",
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -27,13 +28,14 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
   useEffect(() => {
     if (teacher) {
       setFormData({
-        fullName: teacher.fullName || "",
-        email: teacher.email || "",
-        password: "", // password not editable via this endpoint
+        teacherId: teacher.teacherId ?? "",
+        firstName: teacher.firstName || "",
+        lastName: teacher.lastName || "",
+        department: teacher.department || "",
+        subject: teacher.subject || "",
         phone: teacher.phone || "",
         gender: teacher.gender || "",
-        profilePic: teacher.profilePic || "",
-        isActive: teacher.isActive ?? true,
+        status: teacher.status || "Active",
       });
     } else {
       setFormData(emptyForm);
@@ -42,24 +44,20 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
   }, [teacher]);
 
   function handleChange(e) {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    if (!formData.fullName.trim() || !formData.email.trim()) {
-      setError("Full name and email are required.");
+    if (!isEditMode && !formData.teacherId) {
+      setError("Teacher ID is required.");
       return;
     }
-    if (!isEditMode && !formData.password.trim()) {
-      setError("Password is required.");
-      return;
-    }
-    if (!isEditMode && formData.password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError("First name and last name are required.");
       return;
     }
 
@@ -73,15 +71,31 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
 
     try {
       const url = isEditMode
-        ? `${apiBaseUrl}/api/teachers/${teacher._id}`
+        ? `${apiBaseUrl}/api/teachers/${teacher.teacherId}`
         : `${apiBaseUrl}/api/teachers`;
 
       const method = isEditMode ? "PUT" : "POST";
 
-      // password is not sent on edit (backend blocks it)
       const body = isEditMode
-        ? { fullName: formData.fullName, email: formData.email, phone: formData.phone, gender: formData.gender, profilePic: formData.profilePic, isActive: formData.isActive }
-        : { fullName: formData.fullName, email: formData.email, password: formData.password, phone: formData.phone, gender: formData.gender, profilePic: formData.profilePic };
+        ? {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            department: formData.department,
+            subject: formData.subject,
+            phone: formData.phone,
+            gender: formData.gender,
+            status: formData.status,
+          }
+        : {
+            teacherId: Number(formData.teacherId),
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            department: formData.department,
+            subject: formData.subject,
+            phone: formData.phone,
+            gender: formData.gender,
+            status: formData.status,
+          };
 
       const res = await fetch(url, {
         method,
@@ -100,7 +114,7 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
       }
 
       if (onSuccess) onSuccess(json.data.teacher);
-    } catch (err) {
+    } catch {
       setError("Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -115,49 +129,78 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Full Name <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          name="fullName"
-          value={formData.fullName}
-          onChange={handleChange}
-          placeholder="Enter full name"
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter email"
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
       {!isEditMode && (
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Password <span className="text-red-500">*</span>
+            Teacher ID <span className="text-red-500">*</span>
           </label>
           <input
-            type="password"
-            name="password"
-            value={formData.password}
+            type="number"
+            name="teacherId"
+            value={formData.teacherId}
             onChange={handleChange}
-            placeholder="Min. 6 characters"
+            placeholder="Unique numeric ID"
+            min="1"
             className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       )}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          First Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          placeholder="Enter first name"
+          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Last Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          placeholder="Enter last name"
+          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Department
+        </label>
+        <input
+          type="text"
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+          placeholder="e.g. Mathematics"
+          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Subject
+        </label>
+        <input
+          type="text"
+          name="subject"
+          value={formData.subject}
+          onChange={handleChange}
+          placeholder="e.g. Algebra"
+          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -187,36 +230,24 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
+          <option value="unspecified">Unspecified</option>
         </select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Profile Picture URL
-        </label>
-        <input
-          type="text"
-          name="profilePic"
-          value={formData.profilePic}
-          onChange={handleChange}
-          placeholder="https://..."
-          className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
       {isEditMode && (
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="isActive"
-            name="isActive"
-            checked={formData.isActive}
-            onChange={handleChange}
-            className="w-4 h-4 accent-blue-600"
-          />
-          <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-            Active
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Status
           </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
         </div>
       )}
 

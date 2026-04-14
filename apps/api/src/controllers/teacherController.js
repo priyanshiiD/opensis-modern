@@ -1,27 +1,25 @@
-import bcrypt from "bcryptjs";
-import Teacher from "../models/teacher.model.js";
-import { sendError, sendSuccess } from "../utils/http.js";
+import Teacher from '../models/teacher.model.js';
+import { sendError, sendSuccess } from '../utils/http.js';
 
 const ALLOWED_CREATE_FIELDS = [
-  "fullName",
-  "email",
-  "password",
-  "phone",
-  "gender",
-  "subjects",
-  "classes",
-  "profilePic",
+  'teacherId',
+  'firstName',
+  'lastName',
+  'department',
+  'subject',
+  'phone',
+  'gender',
+  'status',
 ];
 
 const ALLOWED_UPDATE_FIELDS = [
-  "fullName",
-  "email",
-  "phone",
-  "gender",
-  "subjects",
-  "classes",
-  "profilePic",
-  "isActive",
+  'firstName',
+  'lastName',
+  'department',
+  'subject',
+  'phone',
+  'gender',
+  'status',
 ];
 
 function pick(obj, keys) {
@@ -36,47 +34,30 @@ export const createTeacher = async (req, res) => {
   try {
     const data = pick(req.body, ALLOWED_CREATE_FIELDS);
 
-    if (!data.fullName || !data.email || !data.password) {
+    if (!data.teacherId || !data.firstName || !data.lastName) {
       return sendError(
         res,
         400,
-        "VALIDATION_ERROR",
-        "fullName, email, and password are required."
+        'VALIDATION_ERROR',
+        'teacherId, firstName, and lastName are required.'
       );
     }
 
-    if (data.password.length < 6) {
-      return sendError(
-        res,
-        400,
-        "VALIDATION_ERROR",
-        "Password must be at least 6 characters."
-      );
-    }
-
-    const existing = await Teacher.findOne({ email: data.email });
+    const existing = await Teacher.findOne({ teacherId: data.teacherId });
     if (existing) {
       return sendError(
         res,
         409,
-        "DUPLICATE_EMAIL",
-        "A teacher with this email already exists."
+        'DUPLICATE_TEACHER_ID',
+        'A teacher with this teacherId already exists.'
       );
     }
 
     const teacher = await Teacher.create(data);
 
-    const teacherObj = teacher.toObject();
-    delete teacherObj.password;
-
-    sendSuccess(res, { teacher: teacherObj }, 201);
+    sendSuccess(res, { teacher }, 201);
   } catch (error) {
-    sendError(
-      res,
-      500,
-      "TEACHER_CREATE_FAILED",
-      `Failed to create teacher: ${error.message}`
-    );
+    sendError(res, 500, 'TEACHER_CREATE_FAILED', `Failed to create teacher: ${error.message}`);
   }
 };
 
@@ -86,9 +67,13 @@ export const getAllTeachers = async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
     const skip = (page - 1) * limit;
 
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.department) filter.department = req.query.department;
+
     const [teachers, total] = await Promise.all([
-      Teacher.find().select('-password').sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Teacher.countDocuments(),
+      Teacher.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Teacher.countDocuments(filter),
     ]);
 
     sendSuccess(res, {
@@ -96,82 +81,56 @@ export const getAllTeachers = async (req, res) => {
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    sendError(
-      res,
-      500,
-      "TEACHERS_FETCH_FAILED",
-      `Failed to fetch teachers: ${error.message}`
-    );
+    sendError(res, 500, 'TEACHERS_FETCH_FAILED', `Failed to fetch teachers: ${error.message}`);
   }
 };
 
 export const getTeacherById = async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id).select('-password').lean();
+    const teacher = await Teacher.findOne({ teacherId: parseInt(req.params.teacherId) }).lean();
     if (!teacher) {
-      return sendError(res, 404, "NOT_FOUND", "Teacher not found.");
+      return sendError(res, 404, 'NOT_FOUND', 'Teacher not found.');
     }
     sendSuccess(res, { teacher });
   } catch (error) {
-    sendError(
-      res,
-      500,
-      "TEACHER_FETCH_FAILED",
-      `Failed to fetch teacher: ${error.message}`
-    );
+    sendError(res, 500, 'TEACHER_FETCH_FAILED', `Failed to fetch teacher: ${error.message}`);
   }
 };
 
-
 export const updateTeacher = async (req, res) => {
   try {
-    const data = pick(req.body, ALLOWED_UPDATE_FIELDS);
-
-    // If password update is needed, it should go through a separate endpoint
-    if (req.body.password) {
-      return sendError(
-        res,
-        400,
-        "VALIDATION_ERROR",
-        "Password cannot be updated via this endpoint."
-      );
+    if (req.body.teacherId !== undefined) {
+      return sendError(res, 400, 'VALIDATION_ERROR', 'teacherId cannot be updated.');
     }
 
-    const teacher = await Teacher.findByIdAndUpdate(req.params.id, data, {
-      new: true,
-      runValidators: true,
-    }).select('-password').lean();
+    const data = pick(req.body, ALLOWED_UPDATE_FIELDS);
+
+    const teacher = await Teacher.findOneAndUpdate(
+      { teacherId: parseInt(req.params.teacherId) },
+      data,
+      { new: true, runValidators: true }
+    ).lean();
 
     if (!teacher) {
-      return sendError(res, 404, "NOT_FOUND", "Teacher not found.");
+      return sendError(res, 404, 'NOT_FOUND', 'Teacher not found.');
     }
 
     sendSuccess(res, { teacher });
   } catch (error) {
-    sendError(
-      res,
-      500,
-      "TEACHER_UPDATE_FAILED",
-      `Failed to update teacher: ${error.message}`
-    );
+    sendError(res, 500, 'TEACHER_UPDATE_FAILED', `Failed to update teacher: ${error.message}`);
   }
 };
 
 export const deleteTeacher = async (req, res) => {
   try {
-    const teacher = await Teacher.findByIdAndDelete(req.params.id);
+    const teacher = await Teacher.findOneAndDelete({ teacherId: parseInt(req.params.teacherId) });
 
     if (!teacher) {
-      return sendError(res, 404, "NOT_FOUND", "Teacher not found.");
+      return sendError(res, 404, 'NOT_FOUND', 'Teacher not found.');
     }
 
-    sendSuccess(res, { message: "Teacher deleted successfully." });
+    sendSuccess(res, { message: 'Teacher deleted successfully.' });
   } catch (error) {
-    sendError(
-      res,
-      500,
-      "TEACHER_DELETE_FAILED",
-      `Failed to delete teacher: ${error.message}`
-    );
+    sendError(res, 500, 'TEACHER_DELETE_FAILED', `Failed to delete teacher: ${error.message}`);
   }
 };

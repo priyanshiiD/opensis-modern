@@ -1,82 +1,70 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+import mongoose from 'mongoose';
+
+export const TEACHER_STATUSES = ['Active', 'Inactive'];
+export const TEACHER_GENDERS = ['male', 'female', 'other', 'unspecified'];
 
 const teacherSchema = new mongoose.Schema(
   {
-    fullName: {
+    teacherId: {
+      type: Number,
+      required: true,
+      unique: true,
+      index: true,
+      min: 1,
+    },
+    firstName: {
       type: String,
       required: true,
       trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
-
-    email: {
+    lastName: {
       type: String,
       required: true,
-      unique: true,
-      sparse: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, "Please use a valid email"],
+      trim: true,
+      minlength: 2,
+      maxlength: 50,
     },
-
-    password: {
+    department: {
       type: String,
-      required: true,
-      minlength: 6,
-      select: false,
+      trim: true,
+      maxlength: 50,
+      default: '',
     },
-
+    subject: {
+      type: String,
+      trim: true,
+      maxlength: 50,
+      default: '',
+    },
     phone: {
       type: String,
-      match: [/^\d{10}$/, "Phone must be 10 digits"],
+      trim: true,
+      match: [/^\d{10}$/, 'Phone must be 10 digits'],
+      default: '',
     },
-
     gender: {
       type: String,
-      enum: ["male", "female", "other"],
+      enum: TEACHER_GENDERS,
+      default: 'unspecified',
     },
-
-    subjects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }],
-
-    classes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Class" }],
-
-    role: {
+    status: {
       type: String,
-      enum: ["teacher", "admin"],
-      default: "teacher",
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-
-    profilePic: {
-      type: String,
+      enum: TEACHER_STATUSES,
+      default: 'Active',
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: 'teachers',
+  }
 );
 
+teacherSchema.index({ lastName: 1, firstName: 1 });
+teacherSchema.index({ status: 1 });
 
-teacherSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  this.password = await bcrypt.hash(this.password, 10);
-});
+const Teacher = mongoose.model('Teacher', teacherSchema);
 
-
-teacherSchema.pre("findOneAndUpdate", async function () {
-  const update = this.getUpdate();
-  if (update.password) {
-    update.password = await bcrypt.hash(update.password, 10);
-  }
-  if (update.$set && update.$set.password) {
-    update.$set.password = await bcrypt.hash(update.$set.password, 10);
-  }
-});
-
-
-teacherSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-export default mongoose.model("Teacher", teacherSchema);
+export default Teacher;
