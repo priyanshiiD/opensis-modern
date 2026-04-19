@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
-import { apiBaseUrl } from "../../../shared/config/env";
+import {
+  createStudent,
+  updateStudent,
+} from "../api/studentApi";
 
 // student prop = edit mode, null = add mode
 // onSuccess called after successful save
@@ -83,65 +86,17 @@ function StudentForm({ student = null, onSuccess, onCancel }) {
     setIsSubmitting(true);
 
     try {
-      const url = isEditMode
-        ? `${apiBaseUrl}/api/students/${student._id}`
-        : `${apiBaseUrl}/api/students`;
-
-      const method = isEditMode ? "PUT" : "POST";
-
-      const body = isEditMode
-        ? {
-            firstName: formData.firstName,
-            middleName: formData.middleName,
-            lastName: formData.lastName,
-            commonName: formData.commonName,
-            email: formData.email || undefined,
-            phone: formData.phone || undefined,
-            gender: formData.gender || undefined,
-            className: formData.className,
-            status: formData.status,
-            dob: formData.dob || undefined,
-            estimatedGradDate: formData.estimatedGradDate || undefined,
-          }
-        : {
-            studentId: Number(formData.studentId),
-            firstName: formData.firstName,
-            middleName: formData.middleName,
-            lastName: formData.lastName,
-            commonName: formData.commonName,
-            email: formData.email || undefined,
-            phone: formData.phone || undefined,
-            gender: formData.gender || undefined,
-            className: formData.className,
-            status: formData.status,
-            dob: formData.dob || undefined,
-            estimatedGradDate: formData.estimatedGradDate || undefined,
-          };
-
-      // Remove undefined fields
-      Object.keys(body).forEach(
-        (key) => body[key] === undefined && delete body[key]
-      );
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error?.message || "Something went wrong.");
-        return;
+      let result;
+      
+      if (isEditMode) {
+        result = await updateStudent(student._id, formData, token);
+      } else {
+        result = await createStudent(formData, token);
       }
 
-      if (onSuccess) onSuccess(json.data.student);
-    } catch {
-      setError("Network error. Please try again.");
+      if (onSuccess) onSuccess(result);
+    } catch (error) {
+      setError(error.message || "Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }

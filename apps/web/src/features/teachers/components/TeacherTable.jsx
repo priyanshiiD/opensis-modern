@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
-import { apiBaseUrl } from "../../../shared/config/env";
+import {
+  fetchTeachers,
+  deleteTeacher,
+} from "../api/teacherApi";
 
 function TeacherTable({ onEdit, refreshKey }) {
   const { getAccessToken } = useAuth();
@@ -16,27 +19,17 @@ function TeacherTable({ onEdit, refreshKey }) {
     setDeletingId(teacher.teacherId);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/teachers/${teacher.teacherId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error?.message || "Failed to delete teacher.");
-        return;
-      }
-
+      await deleteTeacher(teacher.teacherId, token);
       setTeachers((prev) => prev.filter((t) => t.teacherId !== teacher.teacherId));
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (error) {
+      setError(error.message || "Failed to delete teacher.");
     } finally {
       setDeletingId(null);
     }
   }
 
   useEffect(() => {
-    async function fetchTeachers() {
+    async function loadTeachers() {
       setIsLoading(true);
       setError("");
 
@@ -48,26 +41,16 @@ function TeacherTable({ onEdit, refreshKey }) {
       }
 
       try {
-        const res = await fetch(`${apiBaseUrl}/api/teachers`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          setError(json.error?.message || "Failed to load teachers.");
-          return;
-        }
-
-        setTeachers(json.data.teachers);
-      } catch {
-        setError("Network error. Please try again.");
+        const data = await fetchTeachers(token);
+        setTeachers(data);
+      } catch (error) {
+        setError(error.message || "Failed to load teachers.");
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchTeachers();
+    loadTeachers();
   }, [refreshKey]);
 
   if (isLoading) {

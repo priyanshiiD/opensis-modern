@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
-import { apiBaseUrl } from "../../../shared/config/env";
+import {
+  fetchStudents,
+  deleteStudent,
+} from "../api/studentApi";
 
 function StudentTable({ onEdit, refreshKey }) {
   const { getAccessToken } = useAuth();
@@ -17,27 +20,17 @@ function StudentTable({ onEdit, refreshKey }) {
     setDeletingId(student._id);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/students/${student._id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.error?.message || "Failed to delete student.");
-        return;
-      }
-
+      await deleteStudent(student._id, token);
       setStudents((prev) => prev.filter((s) => s._id !== student._id));
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (error) {
+      setError(error.message || "Failed to delete student.");
     } finally {
       setDeletingId(null);
     }
   }
 
   useEffect(() => {
-    async function fetchStudents() {
+    async function loadStudents() {
       setIsLoading(true);
       setError("");
 
@@ -49,26 +42,16 @@ function StudentTable({ onEdit, refreshKey }) {
       }
 
       try {
-        const res = await fetch(`${apiBaseUrl}/api/students`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          setError(json.error?.message || "Failed to load students.");
-          return;
-        }
-
-        setStudents(json.data.students);
-      } catch (err) {
-        setError("Network error. Please try again.");
+        const data = await fetchStudents(token);
+        setStudents(data);
+      } catch (error) {
+        setError(error.message || "Failed to load students.");
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchStudents();
+    loadStudents();
   }, [getAccessToken, refreshKey]);
 
   if (isLoading) {
