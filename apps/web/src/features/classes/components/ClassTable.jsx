@@ -16,7 +16,7 @@ function ClassTable({ onEdit, refreshKey, teachers = [] }) {
   }
 
   async function handleDelete(cls) {
-    if (!window.confirm(`Deactivate class "${cls.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`Deactivate class "${cls.name}"?`)) return;
 
     const token = getAccessToken();
     setDeletingId(cls.classId);
