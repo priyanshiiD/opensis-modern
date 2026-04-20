@@ -265,8 +265,13 @@ function ClassForm({
               value={formData.academicYear}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-              placeholder="e.g., 2026"
+              placeholder="e.g., 2025-26"
+              pattern="^\d{4}-\d{2}$"
+              title="Enter academic year in YYYY-YY format, e.g. 2025-26"
             />
+            <p className="mt-1 text-xs text-gray-500">
+              Use format YYYY-YY, for example 2025-26.
+            </p>
           </div>
 
           {/* Capacity */}
