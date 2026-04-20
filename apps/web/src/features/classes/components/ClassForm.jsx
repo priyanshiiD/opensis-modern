@@ -84,6 +84,10 @@ function ClassForm({
       setError("Academic year is required.");
       return;
     }
+    if (!/^\d{4}-\d{2}$/.test(formData.academicYear.trim())) {
+      setError('Academic year must be in YYYY-YY format (e.g., "2025-26").');
+      return;
+    }
 
     const token = getAccessToken();
     if (!token) {
@@ -94,24 +98,58 @@ function ClassForm({
     setIsSubmitting(true);
 
     try {
+      const gradeLevel = Number.parseInt(formData.gradeLevel, 10);
+      const teacherId = Number.parseInt(formData.teacherId, 10);
+      const classId = Number.parseInt(formData.classId, 10);
+      const academicYear = formData.academicYear.trim();
+      const capacityInput = formData.capacity?.toString().trim() ?? "";
+      let capacity;
+
+      if (capacityInput) {
+        capacity = Number.parseInt(capacityInput, 10);
+        if (!Number.isInteger(capacity) || capacity < 1) {
+          setError("Capacity must be a positive integer.");
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        capacity = isEditMode ? null : undefined;
+      }
+
+      if (!Number.isInteger(gradeLevel)) {
+        setError("Grade level must be a valid number.");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!Number.isInteger(teacherId)) {
+        setError("Teacher must be selected.");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!isEditMode && !Number.isInteger(classId)) {
+        setError("Class ID must be a valid number.");
+        setIsSubmitting(false);
+        return;
+      }
+
       const body = isEditMode
         ? {
             name: formData.name.trim(),
-            gradeLevel: parseInt(formData.gradeLevel),
+            gradeLevel,
             section: formData.section.trim(),
-            teacherId: parseInt(formData.teacherId),
-            academicYear: formData.academicYear.trim(),
-            capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
+            teacherId,
+            academicYear,
+            capacity,
             status: formData.status,
           }
         : {
-            classId: parseInt(formData.classId),
+            classId,
             name: formData.name.trim(),
-            gradeLevel: parseInt(formData.gradeLevel),
+            gradeLevel,
             section: formData.section.trim(),
-            teacherId: parseInt(formData.teacherId),
-            academicYear: formData.academicYear.trim(),
-            capacity: formData.capacity ? parseInt(formData.capacity) : undefined,
+            teacherId,
+            academicYear,
+            capacity,
             status: formData.status,
           };
 

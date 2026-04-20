@@ -9,7 +9,7 @@ The Classes feature provides a complete UI for managing classes, mapping teacher
 ## Features
 
 ### 1. Class Management UI
-- **List View**: Display all classes in a table with filters and pagination
+- **List View**: Display all classes in a table
 - **Add Class**: Create new classes with required fields
 - **Edit Class**: Modify existing class details
 - **Delete Class**: Soft-delete (deactivate) classes
@@ -24,7 +24,7 @@ Class object structure:
   "gradeLevel": 10,
   "section": "A",
   "teacherId": 2001,
-  "academicYear": "2026",
+  "academicYear": "2025-26",
   "capacity": 50,
   "status": "Active",
   "createdAt": "2026-04-20T00:00:00.000Z",
@@ -35,11 +35,11 @@ Class object structure:
 ### 3. Validation Rules
 
 - `classId`: Required for creation, unique, positive integer
-- `name`: Required, 2-100 characters
+- `name`: Required, 2-50 characters
 - `gradeLevel`: Required, integer (1-12)
 - `section`: Required, 1-5 characters (e.g., "A", "B")
 - `teacherId`: Required, must be valid teacher ID
-- `academicYear`: Required, e.g., "2026"
+- `academicYear`: Required, format `YYYY-YY` (e.g., "2025-26")
 - `capacity`: Optional, positive integer (e.g., 50 students)
 - `status`: Enum - `Active` or `Inactive`
 
@@ -78,8 +78,6 @@ Displays classes in a table format with edit/delete controls.
 - `teachers`: Array of teachers for display
 
 **Features:**
-- Pagination support
-- Sorting by creation date
 - Status badges (Active/Inactive)
 - Teacher name resolution
 - Action buttons (Edit, Delete)
@@ -112,7 +110,7 @@ const data = await fetchClasses(token, {
   status: 'Active',
   gradeLevel: 10,
   teacherId: 2001,
-  academicYear: '2026'
+  academicYear: '2025-26'
 });
 ```
 
@@ -133,7 +131,7 @@ const newClass = await createClass(token, {
   gradeLevel: 10,
   section: "A",
   teacherId: 2001,
-  academicYear: "2026",
+  academicYear: "2025-26",
   capacity: 50,
   status: "Active"
 });

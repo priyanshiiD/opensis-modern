@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
 import { fetchClasses, deleteClass } from "../api/classesApi";
 
@@ -9,10 +9,19 @@ function ClassTable({ onEdit, refreshKey, teachers = [] }) {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
 
-  // Helper to find teacher name by teacherId
+  const teacherNameMap = useMemo(
+    () =>
+      new Map(
+        teachers.map((teacher) => [
+          teacher.teacherId,
+          `${teacher.firstName} ${teacher.lastName}`,
+        ])
+      ),
+    [teachers]
+  );
+
   function getTeacherName(teacherId) {
-    const teacher = teachers.find((t) => t.teacherId === teacherId);
-    return teacher ? `${teacher.firstName} ${teacher.lastName}` : "Unknown";
+    return teacherNameMap.get(teacherId) || "Unknown";
   }
 
   async function handleDelete(cls) {
