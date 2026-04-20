@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
-import { apiBaseUrl } from "../../../shared/config/env";
+import {
+  createTeacher,
+  updateTeacher,
+} from "../api/teacherApi";
 
 // teacher prop = edit mode, null = add mode
 // onSuccess called after successful save
@@ -70,52 +73,17 @@ function TeacherForm({ teacher = null, onSuccess, onCancel }) {
     setIsSubmitting(true);
 
     try {
-      const url = isEditMode
-        ? `${apiBaseUrl}/api/teachers/${teacher.teacherId}`
-        : `${apiBaseUrl}/api/teachers`;
-
-      const method = isEditMode ? "PUT" : "POST";
-
-      const body = isEditMode
-        ? {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            department: formData.department,
-            subject: formData.subject,
-            phone: formData.phone,
-            gender: formData.gender,
-            status: formData.status,
-          }
-        : {
-            teacherId: Number(formData.teacherId),
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            department: formData.department,
-            subject: formData.subject,
-            phone: formData.phone,
-            gender: formData.gender,
-            status: formData.status,
-          };
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        setError(json.error?.message || "Something went wrong.");
-        return;
+      let result;
+      
+      if (isEditMode) {
+        result = await updateTeacher(teacher.teacherId, formData, token);
+      } else {
+        result = await createTeacher(formData, token);
       }
 
-      if (onSuccess) onSuccess(json.data.teacher);
-    } catch {
-      setError("Network error. Please try again.");
+      if (onSuccess) onSuccess(result);
+    } catch (error) {
+      setError(error.message || "Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }
