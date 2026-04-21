@@ -3,7 +3,7 @@ import { useAuth } from '../../features/auth/context/AuthContext.jsx';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { logout, isLoading } = useAuth();
+  const { logout, isLoading, user } = useAuth();
 
   async function handleLogout() {
     await logout();
@@ -11,18 +11,29 @@ const Navbar = () => {
   }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-      <div className="text-lg font-semibold text-gray-700">
-        School Management System
+    <header className="h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6">
+      <div className="text-sm text-gray-400 font-medium tracking-wide uppercase">
+        Student Information System
       </div>
 
-      <button
-        onClick={handleLogout}
-        disabled={isLoading}
-        className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-      >
-        {isLoading ? 'Logging out...' : 'Logout'}
-      </button>
+      <div className="flex items-center gap-4">
+        {user && (
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+              {user.username?.charAt(0).toUpperCase() || 'A'}
+            </div>
+            <span className="text-sm font-medium text-gray-700">{user.username}</span>
+          </div>
+        )}
+        <div className="w-px h-5 bg-gray-200" />
+        <button
+          onClick={handleLogout}
+          disabled={isLoading}
+          className="text-sm text-gray-500 hover:text-red-600 font-medium transition-colors disabled:opacity-50"
+        >
+          {isLoading ? 'Logging out...' : 'Sign out'}
+        </button>
+      </div>
     </header>
   );
 };
