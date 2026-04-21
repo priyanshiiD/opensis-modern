@@ -3,7 +3,7 @@ import Layout from "../../../shared/components/Layout";
 import ClassTable from "../components/ClassTable";
 import ClassForm from "../components/ClassForm";
 import { useAuth } from "../../auth/context/AuthContext";
-import { apiBaseUrl } from "../../../shared/config/env";
+import { fetchTeachers } from "../../teachers/api/teacherApi";
 
 // view: "list" | "add" | "edit"
 function ClassesPage() {
@@ -26,20 +26,10 @@ function ClassesPage() {
       }
 
       try {
-        const res = await fetch(`${apiBaseUrl}/api/teachers`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const json = await res.json();
-        if (!res.ok) {
-          setTeachersError(json.error?.message || "Failed to load teachers.");
-          return;
-        }
-
-        setTeachers(json.data?.teachers || []);
+        const data = await fetchTeachers(token);
+        setTeachers(data);
       } catch (err) {
-        setTeachersError("Failed to load teachers.");
-        console.error("Failed to load teachers:", err);
+        setTeachersError(err.message || "Failed to load teachers.");
       } finally {
         setLoadingTeachers(false);
       }

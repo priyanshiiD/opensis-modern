@@ -103,3 +103,42 @@ export async function deleteClass(token, classId) {
 
   return json.data.class;
 }
+
+/**
+ * Enroll students into a class
+ */
+export async function enrollStudents(token, classId, studentIds) {
+  const res = await fetch(`${apiBaseUrl}/api/classes/${classId}/enroll`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ studentIds }),
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.error?.message || 'Failed to enroll students.');
+  }
+
+  return json.data;
+}
+
+/**
+ * Get all students enrolled in a class
+ */
+export async function fetchEnrolledStudents(token, classId) {
+  const res = await fetch(`${apiBaseUrl}/api/classes/${classId}/students`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const json = await res.json();
+
+  if (!res.ok) {
+    throw new Error(json.error?.message || 'Failed to fetch enrolled students.');
+  }
+
+  return json.data;
+}

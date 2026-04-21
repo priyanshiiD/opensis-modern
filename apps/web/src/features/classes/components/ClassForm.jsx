@@ -60,7 +60,7 @@ function ClassForm({
     setError("");
 
     // Validate required fields
-    if (!isEditMode && !formData.classId.trim()) {
+    if (!isEditMode && !String(formData.classId).trim()) {
       setError("Class ID is required.");
       return;
     }
@@ -82,6 +82,10 @@ function ClassForm({
     }
     if (!formData.academicYear.trim()) {
       setError("Academic year is required.");
+      return;
+    }
+    if (!/^\d{4}-\d{2}$/.test(formData.academicYear.trim())) {
+      setError('Academic year must be in YYYY-YY format (e.g. "2025-26").');
       return;
     }
 
@@ -265,7 +269,7 @@ function ClassForm({
               value={formData.academicYear}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
-              placeholder="e.g., 2026"
+              placeholder="e.g., 2025-26"
             />
           </div>
 
