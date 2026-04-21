@@ -5,6 +5,7 @@ import { LoginPage } from '../features/auth/pages/LoginPage.jsx';
 import DashboardPage from '../features/dashboard/pages/DashboardPage.jsx';
 import StudentsPage from '../features/students/pages/StudentsPage.jsx';
 import TeachersPage from "../features/teachers/pages/TeachersPage";
+import ClassesPage from "../features/classes/pages/ClassesPage";
 
 export function App() {
   return (
@@ -32,6 +33,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <StudentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/classes"
+          element={
+            <ProtectedRoute>
+              <ClassesPage />
             </ProtectedRoute>
           }
         />

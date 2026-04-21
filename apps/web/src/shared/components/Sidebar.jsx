@@ -4,6 +4,7 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/students', label: 'Students', icon: '🎓' },
   { to: '/teachers', label: 'Teachers', icon: '👨‍🏫' },
+  { to: '/classes', label: 'Classes', icon: '📚' },
 ];
 
 const Sidebar = () => {
