@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/students', label: 'Students', icon: '🎓' },
+  { to: '/attendance', label: 'Attendance', icon: '📋' },
 ];
 
 const Sidebar = () => {

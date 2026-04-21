@@ -9,8 +9,6 @@ import {
 import { authMiddleware, requirePermissions } from "../middleware/auth.js";
 
 const router = Router();
-
-
 router.use(authMiddleware);
 
 router.get("/", requirePermissions("teachers:read"), getAllTeachers);
