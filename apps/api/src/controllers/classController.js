@@ -1,4 +1,5 @@
 import Class from '../models/class.model.js';
+import Student from '../models/student.model.js';
 import { sendError, sendSuccess } from '../utils/http.js';
 
 const ALLOWED_CREATE_FIELDS = [
@@ -133,6 +134,71 @@ export const deleteClass = async (req, res) => {
     sendSuccess(res, { message: 'Class deactivated successfully.', class: cls });
   } catch (error) {
     sendError(res, 500, 'CLASS_DELETE_FAILED', `Failed to deactivate class: ${error.message}`);
+  }
+};
+
+export const enrollStudents = async (req, res) => {
+  try {
+    const classId = parseInt(req.params.classId);
+    const { studentIds } = req.body;
+
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return sendError(res, 400, 'VALIDATION_ERROR', 'studentIds must be a non-empty array.');
+    }
+
+    const cls = await Class.findOne({ classId });
+    if (!cls) {
+      return sendError(res, 404, 'NOT_FOUND', 'Class not found.');
+    }
+
+    const activeStudents = await Student.find({
+      studentId: { $in: studentIds },
+      status: 'Active',
+    }).lean();
+
+    const foundIds = activeStudents.map((s) => s.studentId);
+    const invalidIds = studentIds.filter((id) => !foundIds.includes(id));
+    if (invalidIds.length > 0) {
+      return sendError(
+        res,
+        400,
+        'INVALID_STUDENT_IDS',
+        `The following studentIds do not exist or are not Active: ${invalidIds.join(', ')}`
+      );
+    }
+
+    const newIds = studentIds.filter((id) => !cls.students.includes(id));
+    if (newIds.length > 0) {
+      cls.students.push(...newIds);
+      await cls.save();
+    }
+
+    sendSuccess(res, {
+      enrolled: newIds.length,
+      skipped: studentIds.length - newIds.length,
+      classId,
+    });
+  } catch (error) {
+    sendError(res, 500, 'ENROLL_FAILED', `Failed to enroll students: ${error.message}`);
+  }
+};
+
+export const getEnrolledStudents = async (req, res) => {
+  try {
+    const classId = parseInt(req.params.classId);
+
+    const cls = await Class.findOne({ classId }).lean();
+    if (!cls) {
+      return sendError(res, 404, 'NOT_FOUND', 'Class not found.');
+    }
+
+    const students = await Student.find({ studentId: { $in: cls.students } })
+      .sort({ lastName: 1, firstName: 1 })
+      .lean();
+
+    sendSuccess(res, { students, total: students.length });
+  } catch (error) {
+    sendError(res, 500, 'ENROLLED_FETCH_FAILED', `Failed to fetch enrolled students: ${error.message}`);
   }
 };
 

@@ -23,7 +23,9 @@ function ClassTable({ onEdit, refreshKey, teachers = [] }) {
 
     try {
       await deleteClass(token, cls.classId);
-      setClasses((prev) => prev.filter((c) => c.classId !== cls.classId));
+      setClasses((prev) =>
+        prev.map((c) => (c.classId === cls.classId ? { ...c, status: "Inactive" } : c))
+      );
     } catch (err) {
       setError(err.message || "Failed to delete class.");
     } finally {

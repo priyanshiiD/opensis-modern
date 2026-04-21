@@ -45,7 +45,11 @@ const classSchema = new mongoose.Schema(
       type: Number,
       min: 1,
     },
-status: {
+    students: {
+      type: [Number],
+      default: [],
+    },
+    status: {
       type: String,
       enum: CLASS_STATUSES,
       default: 'Active',
